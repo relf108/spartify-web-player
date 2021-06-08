@@ -42,7 +42,7 @@ class App extends Component {
       // var prevState = this.state.URIs
       // var newState = prevState.push(URI)
       this.state.URIs.push(URI)
-      this.setState()
+      this.setState({ URI })
       console.log(this.state.URIs);
       alert('Your track was added to the queue');
     }
@@ -63,6 +63,13 @@ class App extends Component {
       });
   }
 
+  player() {
+    this.setState()
+    return <SpotifyPlayer
+      token={localStorage.getItem('token')}
+      uris={this.state.URIs} />
+
+  }
   //Add tracks to queue via share url which converts to URI
   render() {
 
@@ -80,14 +87,10 @@ class App extends Component {
           <input type="text" value={this.state.value} onChange={this.handleChange} />        </label>
             <input type="submit" value="Submit" />
           </form>
+          <div>
+            {this.player()}
+          </div>
         </div>
-        <SpotifyPlayer
-          token={localStorage.getItem('token')}
-          uris={[() => {
-            this.setState()
-            return this.state.URIs
-          }]} />
-
       </div>
     );
   }
