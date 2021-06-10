@@ -43,15 +43,16 @@ class App extends Component {
       if (this.first) {
         this.first = false
         this.state.URIs.push(URI)
+        this.setState({ URI })
       }
       else {
+        //make queue request
         this.queueUpdates.push(URI)
       }
-      this.setState({ URI })
       console.log(this.state.URIs);
-      console.log(this.queueUpdates);
+      //console.log(this.queueUpdates);
 
-      alert('Your track was added to the queue');
+      //alert('Your track was added to the queue');
     }
     catch (err) {
       alert(err)
@@ -61,7 +62,7 @@ class App extends Component {
   }
 
   getAccessToken() {
-    fetch('http://172.28.194.250:8888/accessToken')
+    fetch('http://localhost:8888/accessToken')
       .then(response => response.json())
       .then(response => {
         // Do something with response.
@@ -70,28 +71,46 @@ class App extends Component {
       });
   }
 
+  getQueue() {
+    fetch('http://localhost:8888/queue')
+      .then(response => response.json())
+      .then(response => {
+        // Do something with response.
+        console.log(response.queue)
+        localStorage.setItem('queue', response.queue);
+        return response.queue
+      });
+  }
+  
+  arrayRemove(arr, value) {
+
+    return arr.filter(function (ele) {
+
+      return ele != value;
+    });
+  }
+
   handleCallback = ({ ...playerState }) => {
     const self = this
     console.log(playerState);
-    if (playerState.isPlaying === false || playerState.isActive === false) {
+    this.getQueue()
+    ///Args when song completes
+    if (playerState.isPlaying === false && playerState.isActive === true && playerState.isInitializing === false) {
       var currentTrack = playerState.track.uri
       var noToRemove = 0
-      self.state.URIs.forEach((track) => {
-        console.log(track + ' : ' + currentTrack)
+      var queue = localStorage.getItem('queue').split(',')
+      console.log(queue)
+      queue.forEach((track) => {
         if (track === currentTrack) {
-          self.state.URIs = self.state.URIs.splice(0, noToRemove)
-          self.state.URIs.concat(this.queueUpdates)
-          console.log(self.state.URIs)
-          return
+          queue = queue.splice(0, noToRemove)
         }
         else {
-          noToRemove++;
-          console.log(noToRemove)
+          noToRemove++
         }
-        self.state.URIs = self.state.URIs.splice(0, noToRemove)
-        self.state.URIs.concat(this.queueUpdates)
-
       })
+      self.state.URIs = queue
+      console.log("Inside callback" + self.state.URIs)
+      self.setState({})
     }
   }
 
@@ -101,7 +120,7 @@ class App extends Component {
     return (
       <div className="App">
         <div>
-          <a href='http://172.28.194.250:8888' > Login to Spotify </a>
+          <a href='http://localhost:8888' > Login to Spotify </a>
         </div>
         <div>
           {localStorage.getItem('token')}
