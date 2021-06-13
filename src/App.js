@@ -1,4 +1,4 @@
-import React, { Component, useCallback } from 'react';
+import React, { Component } from 'react';
 import './App.css';
 import SpotifyPlayer from 'react-spotify-web-playback';
 
@@ -16,8 +16,7 @@ class App extends Component {
     this.state = { value: '', URIs: [] };
     this.queueUpdates = []
     this.getAccessToken();
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.handleSync = this.handleSync.bind(this);
   }
 
   toURI(url) {
@@ -30,34 +29,14 @@ class App extends Component {
       return 'spotify:' + linkType + ':' + code;
     }
     else {
-      throw 'Invalid URL'
+      throw Error('Invalid URL')
     }
   }
-  handleChange(event) {
-    this.setState({ value: event.target.value });
-  }
-  handleSubmit(event) {
-    var URI = '';
-    try {
-      URI = this.toURI(this.state.value);
-      if (this.first) {
-        this.first = false
-        this.state.URIs.push(URI)
-        this.setState({ URI })
-      }
-      else {
-        //make queue request
-        this.queueUpdates.push(URI)
-      }
-      console.log(this.state.URIs);
-      //console.log(this.queueUpdates);
 
-      //alert('Your track was added to the queue');
-    }
-    catch (err) {
-      alert(err)
-      alert('Invalid URL');
-    }
+  handleSync(event) {
+    this.getQueue()
+    this.setState({ URIs: localStorage.getItem('queue').split(',') })
+    this.setState({})
     event.preventDefault();
   }
 
@@ -81,33 +60,24 @@ class App extends Component {
         return response.queue
       });
   }
-  
-  arrayRemove(arr, value) {
 
-    return arr.filter(function (ele) {
-
-      return ele != value;
-    });
+  popPlayed(currentTrack) {
+    fetch('http://localhost:8888/popPlayed?currentTrack=' + currentTrack, {
+      method: 'POST'
+    })
   }
 
   handleCallback = ({ ...playerState }) => {
     const self = this
     console.log(playerState);
+    var currentTrack = playerState.track.uri
+    console.log(currentTrack)
+    this.popPlayed(currentTrack)
     this.getQueue()
     ///Args when song completes
     if (playerState.isPlaying === false && playerState.isActive === true && playerState.isInitializing === false) {
-      var currentTrack = playerState.track.uri
-      var noToRemove = 0
+      this.getQueue()
       var queue = localStorage.getItem('queue').split(',')
-      console.log(queue)
-      queue.forEach((track) => {
-        if (track === currentTrack) {
-          queue = queue.splice(0, noToRemove)
-        }
-        else {
-          noToRemove++
-        }
-      })
       self.state.URIs = queue
       console.log("Inside callback" + self.state.URIs)
       self.setState({})
@@ -122,15 +92,17 @@ class App extends Component {
         <div>
           <a href='http://localhost:8888' > Login to Spotify </a>
         </div>
+        <label>
+          Loaded Tracks:
+          <br></br>
+          <br></br>
+          {this.state.URIs}
+        </label>
         <div>
-          {localStorage.getItem('token')}
-        </div>
-        <div>
-          <form onSubmit={this.handleSubmit}>        <label>
-            Track url:
-          <input type="text" value={this.state.value} onChange={this.handleChange} />        </label>
-            <input type="submit" value="Submit" />
-          </form>
+          <label>Click "Sync" to start</label>
+          <button onClick={this.handleSync}>
+            Sync
+          </button>
           <div>
             <SpotifyPlayer
               token={localStorage.getItem('token')}
