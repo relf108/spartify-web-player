@@ -36,7 +36,6 @@ class App extends Component {
   handleSync(event) {
     this.getQueue()
     this.setState({ URIs: localStorage.getItem('queue').split(',') })
-    this.setState({})
     event.preventDefault();
   }
 
