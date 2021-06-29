@@ -40,7 +40,7 @@ class App extends Component {
   }
 
   getAccessToken() {
-    fetch('http://ec2-18-206-64-56.compute-1.amazonaws.com:8888/accessToken')
+    fetch('http://54.165.160.136:8888/accessToken')
       .then(response => response.json())
       .then(response => {
         // Do something with response.
@@ -50,7 +50,7 @@ class App extends Component {
   }
 
   getQueue() {
-    fetch('http://ec2-18-206-64-56.compute-1.amazonaws.com:8888/queue')
+    fetch('http://54.165.160.136:8888/queue')
       .then(response => response.json())
       .then(response => {
         // Do something with response.
@@ -61,7 +61,7 @@ class App extends Component {
   }
 
   popPlayed(currentTrack) {
-    fetch('http://ec2-18-206-64-56.compute-1.amazonaws.com:8888/popPlayed?currentTrack=' + currentTrack, {
+    fetch('http://54.165.160.136:8888/popPlayed?currentTrack=' + currentTrack, {
       method: 'POST'
     })
   }
@@ -89,7 +89,7 @@ class App extends Component {
     return (
       <div className="App">
         <div>
-          <a href='http://ec2-18-206-64-56.compute-1.amazonaws.com:8888' > Login to Spotify </a>
+          <a href='http://54.165.160.136:8888' > Login to Spotify </a>
         </div>
         <label>
           Loaded Tracks:
